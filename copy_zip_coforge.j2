@@ -1,0 +1,66 @@
+# ===============================
+# Conexión a vCenter
+# ===============================
+$User = "{{ vcenter_username }}"
+$Password = ConvertTo-SecureString "{{ vcenter_password }}" -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential ($User, $Password)
+
+Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
+Connect-VIServer "{{ vcenter_hostname }}" -Credential $Cred | Out-Null
+
+# ===============================
+# Variables Guest
+# ===============================
+$guestUser = "{{ vm_guest_user }}"
+$guestPass = "{{ vm_guest_password }}"
+
+{% for vm in vms %}
+Write-Host "==============================="
+Write-Host "Procesando VM: {{ vm }}"
+Write-Host "==============================="
+
+try {
+    # -----------------------------------
+    # 1. Copiar ZIP
+    # -----------------------------------
+    Copy-VMGuestFile -VM "{{ vm }}" `
+        -Source "{{ local_zip }}" `
+        -Destination "{{ remote_zip }}" `
+        -LocalToGuest `
+        -GuestUser $guestUser `
+        -GuestPassword $guestPass `
+        -Force
+
+    # -----------------------------------
+    # 2. hacer Unzip y ejecutar el ps1
+    # -----------------------------------
+    $script = @"
+New-Item -Path 'C:\Temp\Script' -ItemType Directory -Force | Out-Null
+
+Expand-Archive -Path '{{ remote_zip }}' -DestinationPath '{{ remote_folder }}' -Force
+
+Start-Process msiexec.exe -ArgumentList "/i '{{ remote_folder }}\virtio-win-gt-x64.msi' /qn /norestart" -Wait
+"@
+
+    Invoke-VMScript -VM "{{ vm }}" `
+        -GuestUser $guestUser `
+        -GuestPassword $guestPass `
+        -ScriptText $script `
+        -ScriptType Powershell `
+        -ErrorAction Stop
+
+    Write-Host "OK: {{ vm }}"
+}
+catch {
+    Write-Host "ERROR en {{ vm }}: $($_.Exception.Message)"
+}
+{% endfor %}
+
+Disconnect-VIServer -Confirm:$false
+
+
+
+
+
+
+-------------------------------------------------------------------------
