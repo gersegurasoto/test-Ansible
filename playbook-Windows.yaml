@@ -15,10 +15,8 @@
     remote_zip: "C:\\Temp\\Script.zip"
     remote_folder: "C:\\Temp\\Script"
     ps_script: "C:\\Temp\\Script\\Win-Pre.ps1"
-
-
-  vms:
-      - "PRUEBACOMMVAULT"
+    vms:
+        - "PRUEBACOMMVAULT"
 
   tasks:
     - name: Generar script PowerCLI
