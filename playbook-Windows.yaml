@@ -3,13 +3,13 @@
   gather_facts: no
 
   vars:
-    vcenter_hostname: "10.253.3.40"
-    vcenter_username: "XXXy.ansible@ccssmart.com"
-    vcenter_password: "XXXXXX"
-    datacenter_name: "XXXXXX"
+    vcenter_hostname: "10.253.104.155"
+    vcenter_username: "german.segura@ccssmart.com"
+    vcenter_password: "GgSs135!2kabril"
+    datacenter_name: "COLTOCMAINDC"
 
-    vm_guest_user: "XXXXXX"
-    vm_guest_password: "XXXXX"
+    vm_guest_user: "cwbcsc"
+    vm_guest_password: "Colombia123*"
 
     local_zip: "../Script.zip"
     remote_zip: "C:\\Temp\\Script.zip"
