@@ -1,0 +1,42 @@
+- name: Copy Pre-Post scripts validation Windows
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    vcenter_hostname: "10.253.3.40"
+    vcenter_username: "XXXy.ansible@ccssmart.com"
+    vcenter_password: "XXXXXX"
+    datacenter_name: "XXXXXX"
+
+    vm_guest_user: "XXXXXX"
+    vm_guest_password: "XXXXX"
+
+    local_zip: "../Script.zip"
+    remote_zip: "C:\\Temp\\Script.zip"
+    remote_folder: "C:\\Temp\\Script"
+    ps_script: "C:\\Temp\\Script\\Win-Pre.ps1"
+
+  tasks:
+
+    # ---------------------------------------------------
+    # 1. Leer TXT
+    # ---------------------------------------------------
+    - name: Leer lista de VMs
+      ansible.builtin.slurp:
+        src: "vms.txt"
+      register: vm_list
+
+    # ---------------------------------------------------
+    # 2. Parsear VMs 
+    # ---------------------------------------------------
+    - name: Convertir contenido en lista
+      set_fact:
+        vms: "{{ vm_list.content | b64decode | split(',') }}"
+
+    - name: Generar script PowerCLI
+      template:
+        src: copy_zip_coforge.ps1.j2
+        dest: /tmp/deploy_script.ps1
+
+    - name: Ejecutar PowerCLI
+      command: pwsh /tmp/deploy_script.ps1
